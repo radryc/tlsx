@@ -231,10 +231,10 @@ func runList(args []string) error {
 
 func defaultServices() []pki.Service {
 	return []pki.Service{
-		{Name: "monofs-router", Namespace: "monofs"},
-		{Name: "monofs-server", Namespace: "monofs"},
-		{Name: "monofs-search", Namespace: "monofs"},
-		{Name: "monofs-fetcher", Namespace: "monofs"},
+		{Name: "monofs-router", Namespace: "monofs", DNSNames: []string{"router-a", "router-b", "monofs-external", "monofs-external.lb-edge.svc", "monofs-external.lb-edge.svc.cluster.local"}},
+		{Name: "monofs-server", Namespace: "monofs", DNSNames: []string{"node-a", "node-b", "node-c", "node-d", "node-e"}},
+		{Name: "monofs-search", Namespace: "monofs", DNSNames: []string{"search-index"}},
+		{Name: "monofs-fetcher", Namespace: "monofs", DNSNames: []string{"fetcher-a", "fetcher-b"}},
 		{Name: "monofs-registry", Namespace: "monofs"},
 		{Name: "monofs-cache", Namespace: "monofs"},
 		{Name: "kvs", Namespace: "monofs"},

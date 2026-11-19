@@ -349,7 +349,12 @@ func issueLeaf(caCert *x509.Certificate, caKey *ecdsa.PrivateKey, trustDomain st
 		DNSNames:              defaultDNSNames(svc),
 		URIs:                  []*url.URL{uri},
 	}
-	for _, raw := range svc.IPs {
+	ips := svc.IPs
+	if len(ips) == 0 {
+		// Local port-forwards dial 127.0.0.1; include loopback by default.
+		ips = []string{"127.0.0.1", "::1"}
+	}
+	for _, raw := range ips {
 		if ip := net.ParseIP(strings.TrimSpace(raw)); ip != nil {
 			tmpl.IPAddresses = append(tmpl.IPAddresses, ip)
 		}
