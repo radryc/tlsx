@@ -1,0 +1,3 @@
+# Local generated PKI — never commit CA keys or leaves
+.tls/
+*.pem
