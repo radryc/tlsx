@@ -105,6 +105,9 @@ func Generate(opts Options) (*Bundle, error) {
 	if err != nil {
 		return nil, err
 	}
+	if !time.Now().Before(caCert.NotAfter) {
+		return nil, fmt.Errorf("pki: CA expired at %s; rerun without --reuse-ca to create a new CA", caCert.NotAfter.Format(time.RFC3339))
+	}
 	caFile := filepath.Join(opts.Dir, "ca.crt")
 	caKeyFile := filepath.Join(opts.Dir, "ca.key")
 

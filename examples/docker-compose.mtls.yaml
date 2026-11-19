@@ -1,0 +1,15 @@
+# Example local override. Generate the PKI first:
+#   tlsx gen --dir .tls --reuse-ca
+# Then:
+#   docker compose -f docker-compose.yml -f examples/docker-compose.mtls.yaml up -d
+services:
+  monofs-router:
+    volumes:
+      - ./.tls/monofs-router:/var/run/secrets/strata-tls:ro
+    environment:
+      STRATA_TLS_MODE: required
+      STRATA_TLS_REQUIRE_CLIENT_CERT: "true"
+      STRATA_TLS_ALLOWED_SPIFFE_IDS: >-
+        spiffe://strata.local/ns/monofs/sa/monofs-server,
+        spiffe://strata.local/ns/monofs/sa/monofs-search,
+        spiffe://strata.local/ns/monofs/sa/monofs-fetcher

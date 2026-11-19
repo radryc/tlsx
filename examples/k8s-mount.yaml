@@ -1,0 +1,25 @@
+# Example patch for one service. `tlsx install` creates strata-tls-<service>
+# in the service's namespace. Mount it and point the STRATA_TLS_* contract at it.
+#
+#   kubectl -n monofs patch deployment monofs-router --patch-file examples/k8s-mount.yaml
+#
+spec:
+  template:
+    spec:
+      containers:
+        - name: router
+          env:
+            - name: STRATA_TLS_MODE
+              value: required
+            - name: STRATA_TLS_REQUIRE_CLIENT_CERT
+              value: "true"
+            - name: STRATA_TLS_ALLOWED_SPIFFE_IDS
+              value: "spiffe://strata.local/ns/monofs/sa/monofs-server,spiffe://strata.local/ns/monofs/sa/monofs-search"
+          volumeMounts:
+            - name: strata-tls
+              mountPath: /var/run/secrets/strata-tls
+              readOnly: true
+      volumes:
+        - name: strata-tls
+          secret:
+            secretName: strata-tls-monofs-router
