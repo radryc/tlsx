@@ -5,8 +5,10 @@ Shared TLS/mTLS toolkit for Strata services.
 It has two parts:
 
 1. **Go package** (`github.com/radryc/tlsx`) — hot-reloading TLS configs, SPIFFE URI
-   SAN verification, and gRPC transport credentials. It is the single TLS
-   implementation used by MonoFS, Guardian, Doctor, LB, KVS, and the agent.
+   SAN verification, and gRPC transport credentials. `tlsx` is the TLS
+   implementation used by MonoFS, Guardian, Doctor, LB, and KVS. The agent's
+   Python backend (`agent/backend/app/security/tls.py`) implements the same
+   `STRATA_TLS_*` mode and certificate-file contract for its own listener.
 2. **`tlsx` CLI** — generates a local CA + one certificate per service and
    installs them as Kubernetes Secrets. This is the "make it work locally" path;
    production PKI can be delivered by cert-manager, Vault, or SPIFFE and mounted
@@ -26,6 +28,11 @@ All services read the same variables:
 | `STRATA_TLS_REQUIRE_CLIENT_CERT` | `true` | mTLS on servers |
 | `STRATA_TLS_ALLOWED_SPIFFE_IDS` | | server-side peer allowlist |
 | `STRATA_TLS_EXPECTED_SPIFFE_IDS` | | client-side server allowlist |
+
+The agent's Python backend follows the same mode and certificate-file contract
+but defaults `STRATA_TLS_REQUIRE_CLIENT_CERT` to `false`, because its
+browser-facing listener is usually behind a proxy that terminates one-way TLS.
+It does not read the SPIFFE allowlist variables.
 
 Certificates are re-read when the files change, so rotation does not require a
 restart.
