@@ -34,8 +34,10 @@ but defaults `STRATA_TLS_REQUIRE_CLIENT_CERT` to `false`, because its
 browser-facing listener is usually behind a proxy that terminates one-way TLS.
 It does not read the SPIFFE allowlist variables.
 
-Certificates are re-read when the files change, so rotation does not require a
-restart.
+Leaf certificate and key files are re-read on each handshake when their
+modification time changes, so leaf rotation does not require a restart. The CA
+bundle is loaded once into `ClientCAs`/`RootCAs`; rotating the CA still
+requires a process restart.
 
 ## Local flow
 
@@ -48,13 +50,24 @@ go run ./cmd/tlsx verify --dir .tls
 
 # 3. Install one Secret per service: strata-tls-<service>
 go run ./cmd/tlsx install --dir .tls --kubeconfig ~/.kube/config
+#    optional: --context NAME --namespace-override NS --prefix PREFIX --dry-run
 
 # 4. Print env for a service (local docker-compose)
 go run ./cmd/tlsx env --dir .tls --service monofs-router
+
+# 5. List the services in the default bundle
+go run ./cmd/tlsx list
 ```
 
+`gen` accepts `--trust-domain`, `--validity`, `--ca-validity`, `--reuse-ca`, and
+`--force`. `install` accepts `--dry-run` (print YAML), `--prefix`,
+`--namespace-override`, and `--context`.
+
 `gen` also writes `.tls/mtls.env` with per-service path variables and
-`.tls/bundle.json` (service → namespace, SPIFFE ID, expiry).
+`.tls/bundle.json` (service → namespace, SPIFFE ID, expiry). `mtls.env` uses
+service-prefixed names such as `STRATA_TLS_MONOFS_ROUTER_CERT_FILE`; the
+runtime `tlsx.LoadEnv` contract reads the unprefixed `STRATA_TLS_*` names
+(usually supplied by the pod environment), not `mtls.env` directly.
 
 ### Kubernetes mount
 
